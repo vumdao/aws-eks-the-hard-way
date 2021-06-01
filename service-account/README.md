@@ -418,11 +418,11 @@ kube-system   aws-node-qct7x             1/1     Running   0          2m45s
 ```
 
 ### 🚀 **[Conclusion](#-Conclusion)**
-- Use combine  of   `node affinity`, `taints` and `toleration` to ensure the pod of specific service stays in correct node and prevent others.
-- When starting an EKS node (worker), it uses cloud-init service to run eks bootstrap script which helps to config the extra arguments of kubelet service to startup.
-- Using systemD services ensure the order of depenent services.
+- Finally you get the end but we can now sperate the role for applications, daemonset, and later for more such autoscaler group service
 
-Reference:
+<br/>
+
+**Reference:**
 - https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts-technical-overview.html
 - https://aws.github.io/aws-eks-best-practices/security/docs/iam/
 - https://docs.aws.amazon.com/eks/latest/userguide/cni-iam-role.html
