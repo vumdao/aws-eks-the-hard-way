@@ -27,8 +27,7 @@
 - [IAM Roles for Service Accounts (IRSA)](#-IAM-Roles-for-Service-Accounts-(IRSA))
 - [Create EKS cluster using AWS CDK](#-Create-EKS-cluster-using-AWS-CDK)
 - [Create IAM identity provider - Type OpenID Connect](Create-IAM-identity-provider---Type-OpenID-Connect)
-- [Create IAM Service Account Role bind with OIDC provider for projected services](Create-IAM-Service-Account-Role-bind-with-OIDC-provider)
-- [Create IAM Service Account Role bind with OIDC provider for aws-node DaemonSet](Create-IAM-Service-Account-Role-bind-with-OIDC-provider-for-aws-node-DaemonSet)
+- [Create IAM Service Account Role bind with OIDC provider](Create-IAM-Service-Account-Role-bind-with-OIDC-provider)
 - [Conclusion](#-Conclusion)
 
 ---
@@ -312,7 +311,7 @@ class IamOICProvider(Stack):
         daemonset_role.add_to_policy(statement.eks_cni())
 ```
 
-### 🚀 **[Create IAM Service Account Role bind with OIDC provider**
+### 🚀 **[Create IAM Service Account Role bind with OIDC provider](Create-IAM-Service-Account-Role-bind-with-OIDC-provider)**
 
 <p align="center">
   <a href="https://dev.to/vumdao">
@@ -419,7 +418,7 @@ kube-system   aws-node-qct7x             1/1     Running   0          2m45s
 ```
 
 ### 🚀 **[Conclusion](#-Conclusion)**
-- Use combine  of `node affinity`, `taints` and `toleration` to ensure the pod of specific service stays in correct node and prevent others.
+- Use combine  of   `node affinity`, `taints` and `toleration` to ensure the pod of specific service stays in correct node and prevent others.
 - When starting an EKS node (worker), it uses cloud-init service to run eks bootstrap script which helps to config the extra arguments of kubelet service to startup.
 - Using systemD services ensure the order of depenent services.
 
