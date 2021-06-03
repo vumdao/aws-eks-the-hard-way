@@ -7,16 +7,7 @@
   <div><b>Using IAM Service Account Instead Of Instance Profile For EKS Pods</b></div>
 </h1>
 
-### **Why using IAM service account instead of instance profile?**
-- That's a great question! It certainly is a complicated setup, but there's a big advantage that comes along with this compared to other options. There's no global/admin-level role in the cluster that can assume any other role used by apps in the cluster! As such, you never have to worry about a misconfiguration in your cluster granting elevated access to pods.
-
-- The IAM roles for service accounts feature provides the following benefits:
-  - Least privilege — By using the IAM roles for service accounts feature, you no longer need to provide extended permissions to the node IAM role so that pods on that node can call AWS APIs. You can scope IAM permissions to a service account, and only pods that use that service account have access to those permissions. This feature also eliminates the need for third-party solutions such as kiam or kube2iam.
-  - Credential isolation — A container can only retrieve credentials for the IAM role that is associated with the service account to which it belongs. A container never has access to credentials that are intended for another container that belongs to another pod.
-  - Auditability — Access and event logging is available through CloudTrail to help ensure retrospective auditing.
-
-
-
+### **With IAM identity-based policies, you can specify allowed or denied actions and resources as well as the conditions under which actions are allowed or denied. For multiple services in K8S how can we control the permission of using AWS resouce within the pod. The easiest way is to use instance profile which attached to the EKS node but that is the worst way with high risk of security. Let's go through this post to know more**
 
 ---
 
@@ -24,7 +15,9 @@
 
 ## What’s In This Document
 - [Kubernetes Service Accounts](#-Kubernetes-Service-Accounts)
+- [Verify the default service account in the eks cluster](#-Verify-the-default-service-account-in-the-eks-cluster)
 - [IAM Roles for Service Accounts (IRSA)](#-IAM-Roles-for-Service-Accounts-(IRSA))
+- [How to assign IAM roles to service account](#-How-to-assign-IAM-roles-to-service-account)
 - [Create EKS cluster using AWS CDK](#-Create-EKS-cluster-using-AWS-CDK)
 - [Create IAM identity provider - Type OpenID Connect](Create-IAM-identity-provider---Type-OpenID-Connect)
 - [Create IAM Service Account Role bind with OIDC provider](Create-IAM-Service-Account-Role-bind-with-OIDC-provider)
@@ -33,8 +26,12 @@
 ---
 
 ### 🚀 **[Kubernetes Service Accounts](#-Kubernetes-Service-Accounts)**
-**- A service account is a special type of object that allows you to assign a Kubernetes RBAC role to a pod. A default service account is created automatically for each Namespace within a cluster. When you deploy a pod into a Namespace without referencing a specific service account, the default service account for that Namespace will automatically get assigned to the Pod and the Secret, i.e. the service account (JWT) token for that service account, will get mounted to the pod as a volume at /var/run/secrets/kubernetes.io/serviceaccount.**
-- Pod deployment without service account
+- A service account is a special type of object that allows you to assign a Kubernetes RBAC role to a pod. A default service account is created automatically for each Namespace within a cluster. When you deploy a pod into a Namespace without referencing a specific service account, the default service account for that Namespace will automatically get assigned to the Pod and the Secret, i.e. the service account (JWT) token for that service account, will get mounted to the pod as a volume at /var/run/secrets/kubernetes.io/serviceaccount.**
+
+### 🚀 **[Verify the default service account in the eks cluster](#-Verify-the-default-service-account-in-the-eks-cluster)**
+
+- Create Pod deployment without service account, here we use `aws-cli` image to test `s3` permission and then apply
+
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -59,13 +56,17 @@ spec:
           command: ['sleep', '60']
 ```
 
-- Enter to the pod and then get its ENV
+- Get pod's ENV, expect there's no `AWS_ROLE_ARN` and `AWS_WEB_IDENTITY_TOKEN_FILE`
 
 ```
 $ kubectl exec aws-test-854c4fb8c-9lpsv -- env |grep AWS
 ```
 
-- Default token
+- Get the default token in `/var/run/secrets/kubernetes.io/serviceaccount/token`. Decoding the service account token in that directory will reveal the following metadata:
+
+```
+kubectl exec aws-test-854c4fb8c-9lpsv -- cat /var/run/secrets/kubernetes.io/serviceaccount/token
+```
 
 ```
 {
@@ -73,12 +74,12 @@ $ kubectl exec aws-test-854c4fb8c-9lpsv -- env |grep AWS
   "kubernetes.io/serviceaccount/namespace": "dev",
   "kubernetes.io/serviceaccount/secret.name": "default-token-qvr29",
   "kubernetes.io/serviceaccount/service-account.name": "default",
-  "kubernetes.io/serviceaccount/service-account.uid": "d9378593-295f-4be0-a918-7a43114688e8",
+  "kubernetes.io/serviceaccount/service-account.uid": "d9378593-295f-4be0-a918",
   "sub": "system:serviceaccount:dev:default"
 }
 ```
 
-**- The default service account has the following permissions to the Kubernetes API.**
+- The default service account has the following permissions to the Kubernetes API.
 ```
 $ kubectl describe clusterrole system:discovery
 Name:         system:discovery
@@ -100,15 +101,17 @@ PolicyRule:
              [/version]         []              [get]
 ```
 
+- The pod does not have any permissions in AWS services instead it might inherrit from instance profile if we do not block access to instance metadata.
+- Next step we will create an IAM role service account which is fedderated by OpenID connector and assumed by `AssumeRoleWithWebIdentity`. Sound strange right? let's discover moore.
+
 ### 🚀 **[IAM Roles for Service Accounts (IRSA)](#-IAM-Roles-for-Service-Accounts-(IRSA))**
 
-**- IRSA is a feature that allows you to assign an IAM role to a Kubernetes service account. It works by leveraging a Kubernetes feature known as Service Account Token Volume Projection. Pods with service accounts that reference an IAM Role call a public OIDC discovery endpoint for AWS IAM upon startup.**
+- IRSA is a feature that allows you to assign an IAM role to a Kubernetes service account. It works by leveraging a Kubernetes feature known as Service Account Token Volume Projection. Pods with service accounts that reference an IAM Role call a public OIDC discovery endpoint for AWS IAM upon startup.
 
-**-When an AWS API is invoked, the AWS SDKs calls sts:AssumeRoleWithWebIdentity and automatically exchanges the Kubernetes issued token for a AWS role credential.**
+- When an AWS API is invoked, the AWS SDKs calls `sts:AssumeRoleWithWebIdentity` and automatically exchanges the Kubernetes issued token for a AWS role credential.
 
-**-EKS Pod Identity Webhook mutates pods with a ServiceAccount with an `eks.amazonaws.com/role-arn` annotation by adding a ServiceAccount projected token volume and adding environment variables that configure the AWS SDKs to automatically assume the specified role. In order to work, an OIDC provider is configured in AWS IAM to trust the ServiceAccount tokens.**
+- EKS Pod Identity Webhook mutates pods with a ServiceAccount with an `eks.amazonaws.com/role-arn` annotation by adding a ServiceAccount projected token volume and adding environment variables that configure the AWS SDKs to automatically assume the specified role. In order to work, an OIDC provider is configured in AWS IAM to trust the ServiceAccount tokens. The mutating webhook that runs as part of the EKS control plane injects the AWS Role ARN and the path to a web identity token file into the Pod as environment variables. These values can also be supplied manually.
 
-**-A mutating webhook that runs as part of the EKS control plane injects the AWS Role ARN and the path to a web identity token file into the Pod as environment variables. These values can also be supplied manually.**
 ```
 AWS_ROLE_ARN=arn:aws:iam::AWS_ACCOUNT_ID:role/IAM_ROLE_NAME
 AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/token
@@ -117,6 +120,48 @@ AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/to
 - The kubelet will automatically rotate the projected token when it is older than 80% of its total TTL, or after 24 hours. The AWS SDKs are responsible for reloading the token when it rotates.**
 
 ![Alt-Text](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/service-account/img/flow.png?raw=true)
+
+### 🚀 **[How to assign IAM roles to service account](#-How-to-assign-IAM-roles-to-service-account)**
+- First you need EKS cluster to get OpenId connect (OIDC) URL. What is OIDC? OpenID Connect is a simple identity layer on top of the OAuth 2.0 protocol. It allows Clients to verify the identity of the End-User based on the authentication performed by an Authorization Server, as well as to obtain basic profile information about the End-User in an interoperable and REST-like manner.)
+
+- Create IAM identity provider. IAM identity providers (IdPs) manage user identities outside of AWS. You can establish a trust relationship with an IdP to give external user identities permissions to use AWS resources in your account.
+
+- Collect IAM open id connect provider arn and then create an IAM role and set Trust Relationship with Policy Document (limited by condition):
+
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "<open_id_connect_provider_arn>"
+      },
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "oidc.eks.ap-northeast-2.amazonaws.com/id/<OIDC_PROVIDER_ID>:aud": "sts.amazonaws.com",
+          "oidc.eks.ap-northeast-2.amazonaws.com/id/<OIDC_PROVIDER_ID>:sub": "system:serviceaccount:dev:sel-eks-sa"
+        }
+      }
+    }
+  ]
+}
+```
+
+- Attach necessary policies/ managed policies for the role
+
+---
+
+<p align="center">
+  <a href="https://dev.to/vumdao">
+    <img src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/service-account/img/too_much.jpg?raw=true" width="500" />
+  </a>
+</p>
+
+<h1 align="center">
+  <div><b>NO, the most interesting parts waiting for you - Using AWS CDK to create all of the above and CDK8S to create your yaml files</b></div>
+</h1>
 
 ### 🚀 **[Create EKS cluster using AWS CDK](#-Create-EKS-cluster-using-AWS-CDK)**
 
@@ -356,7 +401,7 @@ CreateNameSpace(app, "namespace")
 ServiceAccount(app, 'serviceaccount')
 ```
 
-- Test
+- Test: Use image `aws-cli` to test the S3 permission as we attached `AmazonS3ReadOnlyAccess` to the IRSA
 
 ```
 apiVersion: apps/v1
@@ -418,7 +463,15 @@ kube-system   aws-node-qct7x             1/1     Running   0          2m45s
 ```
 
 ### 🚀 **[Conclusion](#-Conclusion)**
-- Finally you get the end but we can now sperate the role for applications, daemonset, and later for more such autoscaler group service
+- Why using IAM service account instead of instance profile?
+  - There's no global/admin-level role in the cluster that can assume any other role used by apps in the cluster! As such, you never have to worry about a misconfiguration in your cluster granting elevated access to pods.
+
+  - The IAM roles for service accounts feature provides the following benefits:
+    - Least privilege — By using the IAM roles for service accounts feature, you no longer need to provide extended permissions to the node IAM role so that pods on that node can call AWS APIs. You can scope IAM permissions to a service account, and only pods that use that service account have access to those permissions. This feature also eliminates the need for third-party solutions such as kiam or kube2iam.
+    - Credential isolation — A container can only retrieve credentials for the IAM role that is associated with the service account to which it belongs. A container never has access to credentials that are intended for another container that belongs to another pod.
+    - Auditability — Access and event logging is available through CloudTrail to help ensure retrospective auditing.
+
+- Finally you get the end but we can now sperate the roles for applications, daemonset, and later for more such autoscaler group service
 
 <br/>
 
@@ -428,6 +481,7 @@ kube-system   aws-node-qct7x             1/1     Running   0          2m45s
 - https://docs.aws.amazon.com/eks/latest/userguide/cni-iam-role.html
 - https://docs.aws.amazon.com/eks/latest/userguide/managing-vpc-cni.html#updating-vpc-cni-eks-add-on
 - https://blog.mikesir87.io/2020/09/eks-pod-identity-webhook-deep-dive/
+- https://openid.net/connect/
 
 ---
 
