@@ -253,8 +253,8 @@ class EksTestStack(Stack):
         self.eks_cluster.add_nodegroup_capacity(
             id="EksNodeGroup",
             desired_size=1,
-            disk_size=50,
-            instance_types=[ec2.InstanceType("r5a.2xlarge")],
+            disk_size=20,
+            instance_types=[ec2.InstanceType("r5a.xlarge")],
             labels={'role': 'worker', 'type': 'stateless'},
             max_size=2,
             min_size=1,
@@ -339,21 +339,6 @@ class IamOICProvider(Stack):
         )
 
         oic_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonS3ReadOnlyAccess'))
-
-        oic_role.add_to_policy(statement.cognito_power_statement())
-        oic_role.add_to_policy(statement.admin_statement())
-        oic_role.add_to_policy(statement.ddb_statement())
-
-        daemonset_role = iam.Role(
-            self, 'DaemonsetIamRole',
-            role_name='sel-eks-oic-daemonset-sa',
-            assumed_by=iam.FederatedPrincipal(
-                federated=f'arn:aws:iam::{env.account}:oidc-provider/{oidc_provider}',
-                conditions={'StringEquals': string_like('kube-system', 'aws-node')},
-                assume_role_action='sts:AssumeRoleWithWebIdentity'
-            )
-        )
-        daemonset_role.add_to_policy(statement.eks_cni())
 ```
 
 ### 🚀 **[Create IAM Service Account Role bind with OIDC provider](Create-IAM-Service-Account-Role-bind-with-OIDC-provider)**
@@ -364,7 +349,7 @@ class IamOICProvider(Stack):
   </a>
 </p>
 
-**1. IAM service account for projected services**
+
 - Create Service account using `CDK8S`
 
 ```
@@ -439,27 +424,6 @@ AWS_WEB_IDENTITY_TOKEN_FILE=/var/run/secrets/eks.amazonaws.com/serviceaccount/to
 ```
 $ kubectl exec aws-test-7d5c5b6b95-csphv -- aws s3 ls | wc -l
 76
-```
-
-**2. IAM service account for `aws-node` DaemonSet**
-
-- The Amazon VPC CNI plugin for Kubernetes is the networking plugin for pod networking in Amazon EKS clusters. The plugin is responsible for allocating VPC IP addresses to Kubernetes nodes and configuring the necessary networking for pods on each node. The plugin requires IAM permissions, provided by the AWS managed policy AmazonEKS_CNI_Policy, to make calls to AWS APIs on your behalf.
-
-- In another words, the aws-node daemonset is configured to use a role assigned to the EC2 instances to assign IPs to pods. This role includes several AWS managed policies, e.g. AmazonEKS_CNI_Policy and EC2ContainerRegistryReadOnly that effectly allow all pods running on a node to attach/detach ENIs, assign/unassign IP addresses, or pull images from ECR. Since this presents a risk to your cluster, it is recommended that you update the aws-node daemonset to use IRSA.
-
-- If you're using the Amazon EKS add-on with a 1.18 or later Amazon EKS cluster, we just need to add the Amazon VPC CNI Amazon EKS add-on with the role we select or default `aws-node`
-
-- Important note; VPC CNI is also provided as a managed add-on, however I am not a big fan of this particular component to be managed by AWS. I would suggest you simply deploy your own configuration of VPC CNI (YAML format) using Flux. That way you will stay in control of what is actually being deployed. There were many issues with it and I won’t recommend moving this to be a managed add-on. So Manually Configuring the Amazon VPC CNI plugin to use IAM roles for service accounts
-- Download `aws-k8s-cni.yaml` to custer IAM role (optional) and the apply it
-- All the rest is to create the role (included in EKS cluster stack) and annotate the service account with the IAM role
-
-```
-kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=arn:aws:iam::123456789012:role/sel-eks-oic-daemonset-sa
-$ kubectl exec aws-node-qct7x -n kube-system -- env |grep "AWS_ROLE\|AWS_REG"
-AWS_REGION=ap-northeast-2
-AWS_ROLE_ARN=arn:aws:iam::123456789012:role/sel-eks-oic-daemonset-sa
-$ kubectl get pod -A | grep aws-node
-kube-system   aws-node-qct7x             1/1     Running   0          2m45s
 ```
 
 ### 🚀 **[Conclusion](#-Conclusion)**
