@@ -64,7 +64,7 @@ cluster-autoscaler-68857f6759-cwd8b   1/1     Running   0          2d10h
 
 ### 🚀 **[Create IAM role for service account](#-Create-IAM-role-for-service-account)**
 
-- Pre-requisite: EKS cluster with OpenID connect, IAM identity provider (Ref ot [Using IAM Service Account Instead Of Instance Profile For EKS Pods
+- Pre-requisite: EKS cluster with OpenID connect, IAM identity provider (Ref to [Using IAM Service Account Instead Of Instance Profile For EKS Pods
 ](https://dev.to/vumdao/using-iam-service-account-instead-of-instance-profile-for-eks-pods-262p) for how to)
 
 - First create the IAM role which is federated by IAM identiy provider and assumed by `sts:AssumeRoleWithWebIdentity`, then attach policy to provide permission of autoscaling group for the role. Brief of CDK code in python3:
