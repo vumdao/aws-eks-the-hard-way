@@ -7,7 +7,8 @@
   <div><b>Using IAM Service Account Instead Of Instance Profile For EKS Pods</b></div>
 </h1>
 
-### **With IAM identity-based policies, you can specify allowed or denied actions and resources as well as the conditions under which actions are allowed or denied. For multiple services in K8S how can we control the permission of using AWS resouce within the pod. The easiest way is to use instance profile which attached to the EKS node but that is the worst way with high risk of security. Let's go through this post to know more**
+### **- With IAM identity-based policies, you can specify allowed or denied actions and resources as well as the conditions under which actions are allowed or denied.**
+### **- For multiple services in K8S how can we control the permission of using AWS resouce within the pod. The easiest way is to use instance profile which attached to the EKS node but that is the worst way with high risk of security. Let's go through this post to know more**
 
 ---
 
@@ -435,7 +436,7 @@ $ kubectl exec aws-test-7d5c5b6b95-csphv -- aws s3 ls | wc -l
     - Credential isolation — A container can only retrieve credentials for the IAM role that is associated with the service account to which it belongs. A container never has access to credentials that are intended for another container that belongs to another pod.
     - Auditability — Access and event logging is available through CloudTrail to help ensure retrospective auditing.
 
-- Finally you get the end but we can now sperate the roles for applications, daemonset, and later for more such autoscaler group service
+- Finally you get the end but we can now sperate the roles for applications and the eks nodes, and later for more such autoscaler group service and daemonSet node.
 
 <br/>
 
