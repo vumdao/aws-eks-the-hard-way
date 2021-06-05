@@ -8,7 +8,7 @@
 </h1>
 
 ### **- With IAM identity-based policies, you can specify allowed or denied actions and resources as well as the conditions under which actions are allowed or denied.**
-### **- For multiple services in K8S how can we control the permission of using AWS resouce within the pod. The easiest way is to use instance profile which attached to the EKS node but that is the worst way with high risk of security. Let's go through this post to know more**
+### **- For multiple services in K8S how can we control the permission of using AWS resouce within the pod. The easiest way is to use instance profile which attached to the EKS node but trade-off with high risk of security. Let's go through this post to know more**
 
 ---
 
