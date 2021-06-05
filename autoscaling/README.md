@@ -175,9 +175,6 @@ deployment.apps/cluster-autoscaler restarted
   - Node group balancing is enabled by setting balance-similar-node-groups=true.
   - Node Groups are configured with identical settings except for different availability zones and EBS Volumes.
 
-**Ref:**
-- https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/cluster-autoscaling/
-
 ---
 
 ### 🚀 **[Conclusion](#-Conclusion)**
@@ -187,6 +184,9 @@ deployment.apps/cluster-autoscaler restarted
   <img src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/autoscaling/img/reduce_bill.jpg?raw=true" />
 </p>
 
+**- Refs:**
+  - https://docs.aws.amazon.com/eks/latest/userguide/cluster-autoscaler.html
+  - https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/cluster-autoscaling/
 
 ---
 
