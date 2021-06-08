@@ -9,7 +9,7 @@
 
 ## **In another words, this post is about Configuring the Amazon VPC CNI plugin to use IAM roles for service accounts**
 - The Amazon VPC CNI plugin for Kubernetes is the networking plugin for pod networking in Amazon EKS clusters. The plugin is responsible for allocating VPC IP addresses to Kubernetes nodes and configuring the necessary networking for pods on each node. The plugin:
-    - Requires IAM permissions, provided by the AWS managed policy AmazonEKS_CNI_Policy, to make calls to AWS APIs on your behalf.
+    - Requires IAM permissions, provided by the AWS managed policy `AmazonEKS_CNI_Policy`, to make calls to AWS APIs on your behalf.
     - Creates and is configured to use a service account named `aws-node` when it's deployed. The service account is bound to a Kubernetes `clusterrole` named `aws-node`, which is assigned the required Kubernetes permissions.
 
 <br>
@@ -88,12 +88,42 @@ kubectl apply -f https://raw.githubusercontent.com/aws/amazon-vpc-cni-k8s/releas
 - Annotate the IRSA to aws-node service account
 ```
 $ kubectl annotate serviceaccount -n kube-system aws-node eks.amazonaws.com/role-arn=arn:aws:iam::123456789012:role/sel-eks-oic-daemonset-sa
+```
 
+### 🚀 **[Restart the aws-node daemonset to take effect](#-Restart-the-aws-node-daemonset-to-take-effect)**
+- Rollout restart `aws-node` daemonset
+```
+$ kubectl rollout restart daemonset aws-node -n kube-system
+$ kubectl get pod -n kube-system | grep aws-node
+aws-node-bnb8v                                  0/1     Running   0          16s
+```
+
+- Check `aws-node` ENV to confirm EKS Pod Identity Webhook mutates `aws-node` pods with a ServiceAccount
+
+```
 $ kubectl exec aws-node-qct7x -n kube-system -- env |grep "AWS_ROLE\|AWS_REG"
 AWS_REGION=ap-northeast-2
 AWS_ROLE_ARN=arn:aws:iam::123456789012:role/sel-eks-oic-daemonset-sa
-
-$ kubectl get pod -A | grep aws-node
-kube-system   aws-node-qct7x             1/1     Running   0          2m45s
 ```
 
+### 🚀 **[Conclusion](#-Conclusion)**
+- This is just a small steps in the field of EKS K8S securities but we get our foot in
+- Read [Using IAM Service Account Instead Of Instance Profile For EKS Pods](https://dev.to/vumdao/using-iam-service-account-instead-of-instance-profile-for-eks-pods-262p) to have better understand about IRSA
+
+---
+
+<h3 align="center">
+  <a href="https://dev.to/vumdao">:stars: Blog</a>
+  <span> · </span>
+  <a href="https://github.com/vumdao/aws-eks-the-hard-way">Github</a>
+  <span> · </span>
+  <a href="https://stackoverflow.com/users/11430272/vumdao">stackoverflow</a>
+  <span> · </span>
+  <a href="https://www.linkedin.com/in/vu-dao-9280ab43/">Linkedin</a>
+  <span> · </span>
+  <a href="https://www.linkedin.com/groups/12488649/">Group</a>
+  <span> · </span>
+  <a href="https://www.facebook.com/CloudOpz-104917804863956">Page</a>
+  <span> · </span>
+  <a href="https://twitter.com/VuDao81124667">Twitter :stars:</a>
+</h3>
