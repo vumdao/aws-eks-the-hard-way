@@ -123,7 +123,7 @@ users:
 $ export NO_PROXY=169.254.169.254
 ```
 
-### 🚀 **[Add more usre/role to aws-auth ConfigMap)](#-Add-more-usre/role-to-aws-auth-ConfigMap)**
+### 🚀 **[Add more usre/role to aws-auth ConfigMap](#-Add-more-usre/role-to-aws-auth-ConfigMap)**
 
 <br/>
 
