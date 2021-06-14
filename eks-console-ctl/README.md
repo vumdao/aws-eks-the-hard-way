@@ -11,7 +11,10 @@
 
 <br>
 
-**- When an Amazon EKS cluster is created, the IAM entity (user or role) that creates the cluster is added to the Kubernetes RBAC authorization table as the administrator (with `system:masters` permissions). Initially, only that IAM user can make calls to the Kubernetes API server using kubectl. So ensure that your console such as EC2 instance attached that user/role credential for further steps, otherwise, no way to use the `kubectl`**
+**- When an Amazon EKS cluster is created, the IAM entity (user or role) that creates the cluster is added to the Kubernetes RBAC authorization table as the administrator (with `system:masters` permissions). Initially, only that IAM user can make calls to the Kubernetes API server using kubectl. So ensure that your console such as EC2 instance attached that user/role credential for further steps, otherwise, no way to use the `kubectl`.**
+</br>
+
+**-In this tutorial, we will introduce how to create an IAM entity that having the `system:master` permissions on the existing EKS cluster, attaching this role to an EC2 instance and accessing to EKS cluster via kubectl installed on this instance.**
 
 <br>
 
