@@ -144,6 +144,7 @@ users:
 ```
 
 - **Note:** If running the preceding curl command returns a 404 error, check the following:
+
 ```
 $ export NO_PROXY=169.254.169.254
 ```
@@ -161,7 +162,9 @@ $ export NO_PROXY=169.254.169.254
   ```
 
   - Add the IAM role to mapRoles
-  ```mapRoles: |
+
+  ```
+  mapRoles: |
     - rolearn: arn:aws:iam::123456789012:role/testrole
       username: testrole
       groups:
@@ -170,6 +173,7 @@ $ export NO_PROXY=169.254.169.254
 
 **- Then update kubeConfig file again with that role or user**
   - For adding role
+  
     ```
     aws eks update-kubeconfig --name eks-cluster-name --region aws-region --role-arn arn:aws:iam::123456789012:role/testrole
     ```
