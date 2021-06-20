@@ -31,7 +31,7 @@
 
 ### 🚀 **[What is Cluster Autoscaler](#-What-is-Cluster-Autoscaler)**
 - Cluster Autoscaler is a tool that automatically adjusts the size of the Kubernetes cluster when one of the following conditions is true:
-  - There are pods that failed to run in the cluster due to insufficient resources. Whenever this occurs, the Cluster Autoscaler will update the Amazon EC2 Auto Scaling group to increase the desired count, resulting in additional nodes in the cluster. Additionally, the Cluster Autoscaler will detect nodes that have been underutilized and reschedule pods onto other nodes
+  - There are pods that failed to run in the cluster due to insufficient resources. Whenever this occurs, the Cluster Autoscaler will update the Amazon EC2 Auto Scaling group to increase the desired count, resulting in additional nodes in the cluster.
   - There are nodes in the cluster that have been underutilized for an extended period of time and their pods can be placed on other existing nodes. Cluster Autoscaler will then decrease the desired count for the Auto Scaling group to scale in the number of nodes.
 
 
@@ -44,10 +44,14 @@ wget https://raw.githubusercontent.com/kubernetes/autoscaler/master/cluster-auto
 ```
 
 - Edit the cluster-autoscaler container command to replace <YOUR CLUSTER NAME> (including <>) with your cluster's name, and add the following options.
-```
---balance-similar-node-groups
---skip-nodes-with-system-pods=false
-```
+
+  ```
+  --balance-similar-node-groups
+  --skip-nodes-with-system-pods=false
+  ```
+
+  - How to run a cluster with nodes in multiples zones for HA. The flag `balance-similar-node-groups` is intended to support this use case
+  - `skip-nodes-with-system-pods` If true cluster autoscaler will never delete nodes with pods from kube-system (except for DaemonSet or mirror pods) we should avoid this for cost optimization.
 
 - Check the files at some important fields
   1. ServiceAccount
