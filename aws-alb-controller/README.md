@@ -7,16 +7,6 @@
   <div><b>Create AWS Load Balancer Controller Ingress With CDK8S</b></div>
 </h1>
 
---------
-title: AWS EKS The Hard-Way
-published: true
-description: Build from scratch, trouble shoot and go in advanced
-tags: aws, eks, cloudopz, ingress
-cover_image: https://github.com/vumdao/aws-eks-the-hard-way/blob/master/aws-alb-controller/img/cover.jpg?raw=true
-series: "Publishing on Dev.to"
---------
-
-
 ## Table Of Contents
  * [What is AWS Load Balancer Controller](#What-is-AWS-Load-Balancer-Controller)
  * [Install AWS Load Balancer Controller as the ingress controller](#Install-AWS-Load-Balancer-Controller-as-the-ingress-controller)
@@ -271,8 +261,18 @@ class Route53Stack(Stack):
 
 ---
 
-{% user vumdao %}
-
-{% github vumdao/vumdao no-readme %}
-
-Follow my post in {% tag cloudopz %}content
+<h3 align="center">
+  <a href="https://dev.to/vumdao">:stars: Blog</a>
+  <span> · </span>
+  <a href="https://github.com/vumdao/aws-eks-the-hard-way">Github</a>
+  <span> · </span>
+  <a href="https://stackoverflow.com/users/11430272/vumdao">stackoverflow</a>
+  <span> · </span>
+  <a href="https://www.linkedin.com/in/vu-dao-9280ab43/">Linkedin</a>
+  <span> · </span>
+  <a href="https://www.linkedin.com/groups/12488649/">Group</a>
+  <span> · </span>
+  <a href="https://www.facebook.com/CloudOpz-104917804863956">Page</a>
+  <span> · </span>
+  <a href="https://twitter.com/VuDao81124667">Twitter :stars:</a>
+</h3>
