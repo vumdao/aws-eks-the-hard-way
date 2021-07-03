@@ -23,6 +23,7 @@ series: "Publishing on Dev.to"
  * [Create AWS ALB IAM Role Service Account Using CDK](#Create-AWS-ALB-IAM-Role-Service-Account-Using-CDK)
  * [Create Ingress Using CDK8S](#Create-Ingress-Using-CDK8S)
  * [Apply the ingress yaml files](#Apply-the-ingress-yaml-files)
+ * [Create Route53 records for the domains using CDK](#Create-Route53-records-for-the-domains-using-CDK)
  * [Conclusion](#-Conclusion)
 
 ---
@@ -218,6 +219,60 @@ logging     kibana                   <none>   kibana.cloudopz.co          k8s-de
 kubectl logs -f --tail=100 -n kube-system -l app.kubernetes.io/name=aws-load-balancer-controller
 ```
 
+## 🚀 **Create Route53 records for the domains using CDK** <a name="Create Route53 records for the domains using CDK"></a>
+- In order to automate detect the AWS k8s ALB, we can use `lookup` function and base on the tag the AWS ALB controller created `ingress.k8s.aws/stack: <group>`
+
+```
+import re
+import os
+from constructs import Construct
+import boto3
+from aws_cdk import (
+    App, Stack, Environment, Tags, CfnTag, Duration,
+    aws_elasticloadbalancingv2 as elbv2,
+    aws_route53 as _route53,
+)
+
+
+class Route53Stack(Stack):
+
+    def __init__(self, scope: Construct, id: str, env, **kwargs) -> None:
+        super().__init__(scope, id, env=env, **kwargs)
+
+        def cname_record(record_name, hosted_zone):
+            _route53.CnameRecord(
+                self, 'Route53Cname',
+                domain_name=alb_dns,
+                record_name=record_name,
+                zone=hosted_zone,
+                ttl=Duration.minutes(1)
+            )
+
+        alb = elbv2.ApplicationLoadBalancer.from_lookup(
+            self, "AlbIngress",
+            load_balancer_tags={'ingress.k8s.aws/stack': 'dev'}
+        )
+        alb_dns = alb.load_balancer_dns_name
+
+        dev_hosted_zone = 'Z88PZ8J8P8RXXX'
+
+        hz = _route53.HostedZone.from_hosted_zone_attributes(
+            self, id="HostedZone", hosted_zone_id=dev_hosted_zone, zone_name='cloudopz.co')
+
+        records = ['dev.cloudopz.co', 'akhq.cloudopz.co', 'argocd.cloudopz.co',
+                   'grafana.cloudopz.co', 'kibana.cloudopz.co']
+        for record in records:
+            cname_record(record, hz)
+```
+
 ## 🚀 **Conclusion** <a name="Conclusion"></a>
-- Keywords: IRSA, AWS ALB controller, ingress and cdk8s
+- Keywords: IRSA, AWS ALB controller, ingress, cdk and cdk8s
 - If we change order of the ingress group, it might make ALB downtime a little bit to re-generate the rules.
+
+---
+
+{% user vumdao %}
+
+{% github vumdao/vumdao no-readme %}
+
+Follow my post in {% tag cloudopz %}content
