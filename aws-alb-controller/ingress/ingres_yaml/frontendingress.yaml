@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/actions.frontend-condition: '{"Type":"forward","ForwardConfig":{"TargetGroups":[{"ServiceName":"frontend","ServicePort":"2087","Weight":100}]}}'
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:123456789012:certificate/aaaa-bbbb-cccc-xxxx
+    alb.ingress.kubernetes.io/conditions.frontend-condition: '[{"field":"path-pattern","pathPatternConfig":{"values":["/frontend/*"]}}]'
+    alb.ingress.kubernetes.io/group.name: dev
+    alb.ingress.kubernetes.io/group.order: "100"
+    alb.ingress.kubernetes.io/healthcheck-path: /frontend/health-check.do
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    kubernetes.io/ingress.class: alb
+  labels:
+    dev: frontend
+  name: frontend
+spec:
+  rules:
+    - http:
+        paths:
+          - backend:
+              serviceName: frontend-condition
+              servicePort: use-annotation

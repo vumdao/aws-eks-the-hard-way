@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/actions.akhq-condition: '{"Type":"forward","ForwardConfig":{"TargetGroups":[{"ServiceName":"akhq","ServicePort":"8080","Weight":100}]}}'
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-northeast-2:123456789012:certificate/aaaa-bbbb-cccc-xxxx
+    alb.ingress.kubernetes.io/conditions.akhq-condition: '[{"Field":"source-ip","SourceIpConfig":{"Values":["42.116.129.230/32"]}}]'
+    alb.ingress.kubernetes.io/group.name: dev
+    alb.ingress.kubernetes.io/group.order: "3"
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    kubernetes.io/ingress.class: alb
+  labels:
+    dev: akhq
+  name: akhq
+spec:
+  rules:
+    - host: dev-akhq.cloudopz.co
+      http:
+        paths:
+          - backend:
+              serviceName: akhq-condition
+              servicePort: use-annotation
