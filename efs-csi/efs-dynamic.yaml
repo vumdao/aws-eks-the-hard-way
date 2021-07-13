@@ -1,0 +1,67 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+parameters:
+  provisioningMode: efs-ap
+  fileSystemId: fs-a13cb9c1
+  directoryPerms: "700"
+  gidRangeStart: "1000"
+  gidRangeEnd: "2000"
+  basePath: "/data"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-claim
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: efs-writer
+  namespace: storage
+spec:
+  containers:
+    - name: efs-writer
+      image: centos
+      command: ["/bin/sh"]
+      args: ["-c", "while true; do echo $(date -u) >> /data/out; sleep 5; done"]
+      volumeMounts:
+        - name: persistent-storage
+          mountPath: /data
+  volumes:
+    - name: persistent-storage
+      persistentVolumeClaim:
+        claimName: efs-claim
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: efs-reader
+  namespace: storage
+spec:
+  containers:
+  - name: efs-reader
+    image: busybox
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do sleep 5; done"]
+    volumeMounts:
+    - name: efs-pvc
+      mountPath: /data
+  volumes:
+  - name: efs-pvc
+    persistentVolumeClaim:
+      claimName: efs-claim
