@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://dev.to/vumdao">
-    <img alt="AWS EKS With EFS CSI Driver And IRSA Using CDK" src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/efs-csi/img/cover.jpg?raw=true"  />
+    <img alt="AWS EKS With EFS CSI Driver And IRSA Using CDK" src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/efs-csi/img/cover.jpg?raw=true" width="800" />
   </a>
 </p>
 <h1 align="center">
@@ -13,6 +13,7 @@
 ## Table Of Contents
  * [What is Amazon Elastic File System?](#What-is-Amazon-Elastic-File-System?)
  * [What is Amazon EFS CSI driver?](#What-is-Amazon-EFS-CSI-driver?)
+ * [Amazon EFS Access Points](#Amazon-EFS-Access-Points)
  * [EFS provisioner Architecture](#EFS-provisioner-Architecture)
  * [Create EFS Using CDK](#Create-EFS-Using-CDK)
  * [Create IAM role for service account for CSI](#-Create-IAM-role-for-service-account-for-CSI)
@@ -21,11 +22,21 @@
  * [Create storageclass, pv and pvc - EFS Access Points](#-Create-storageclass,-pv-and-pvc---EFS-Access-Points)
  * [How to troubleshoot](#-How-to-troubleshoot)
 
-width="700"
 ---
 
 ## 🚀 **What is Amazon Elastic File System?** <a name="What-is-Amazon-Elastic-File-System?"></a>
 - [Amazon Elastic File System (Amazon EFS)](https://www.youtube.com/watch?v=AvgAozsfCrY) provides a simple, scalable, fully managed elastic NFS file system for use with AWS Cloud services and on-premises resources.
+
+## 🚀 **What is Amazon EFS CSI driver?** <a name="What-is-Amazon-EFS-CSI-driver?"></a>
+- The [Amazon EFS Container Storage Interface (CSI) driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver) provides a CSI interface that allows Kubernetes clusters running on AWS to manage the lifecycle of Amazon EFS file systems.
+- More information about CSI - [Container Storage Interface (CSI) for Kubernetes GA](https://kubernetes.io/blog/2019/01/15/container-storage-interface-ga/)
+- What is the benefit here? - [Introducing Amazon EFS CSI dynamic provisioning](https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/)
+
+## 🚀 **Amazon EFS Access Points** <a name="Amazon-EFS-Access-Points"></a>
+- [Amazon EFS access points](https://docs.aws.amazon.com/efs/latest/ug/efs-access-points.html) are application-specific entry points into an EFS file system that make it easier to manage application access to shared datasets. Access points can enforce a user identity, including the user's POSIX groups, for all file system requests that are made through the access point. Access points can also enforce a different root directory for the file system so that clients can only access data in the specified directory or its subdirectories.
+
+- You can use AWS Identity and Access Management (IAM) policies to enforce that specific applications use a specific access point. By combining IAM policies with access points, you can easily provide secure access to specific datasets for your applications.
+
 
 ## 🚀 **EFS provisioner Architecture** <a name="EFS-provisioner-Architecture"></a>
 <p align="center">
@@ -50,11 +61,6 @@ width="700"
 - Ref: https://www.padok.fr/en/blog/efs-provisioner-kubernetes
 
 - You should have known about `aws-efs` provisioner from `quay.io/external_storage/efs-provisioner:latest`. Here introduces `CSIDriver` as EFS provisioner
-
-## 🚀 **What is Amazon EFS CSI driver?** <a name="What-is-Amazon-EFS-CSI-driver?"></a>
-- The [Amazon EFS Container Storage Interface (CSI) driver](https://github.com/kubernetes-sigs/aws-efs-csi-driver) provides a CSI interface that allows Kubernetes clusters running on AWS to manage the lifecycle of Amazon EFS file systems.
-- More information about CSI - [Container Storage Interface (CSI) for Kubernetes GA](https://kubernetes.io/blog/2019/01/15/container-storage-interface-ga/)
-- What is the benefit here? - [Introducing Amazon EFS CSI dynamic provisioning](https://aws.amazon.com/blogs/containers/introducing-efs-csi-dynamic-provisioning/)
 
 ---
 
