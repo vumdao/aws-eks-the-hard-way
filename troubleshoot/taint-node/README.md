@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://dev.to/vumdao">
-    <img alt="Add Taints To AWS EKS Cluster And Trouble Shooting" src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/troubleshoot/img/cover.jpg?raw=true" width="700" />
+    <img alt="Add Taints To AWS EKS Cluster And Trouble Shooting" src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/troubleshoot/taint-node/img/cover.jpg?raw=true" width="700" />
   </a>
 </p>
 <h1 align="center">
@@ -10,7 +10,7 @@
 ### **Taints and Tolerations is used to ensure the node should not accept any pods that do not tolerate the taints. How to add taints to AWS EKS node group? This blog will show you how and the way of trouble shooting**
 <p align="center">
   <a href="https://dev.to/vumdao">
-    <img alt="Taints and Tolerations" src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/troubleshoot/img/taint_toleration.png?raw=true" width="700" />
+    <img alt="Taints and Tolerations" src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/troubleshoot/taint-node/img/taint_toleration.png?raw=true" width="700" />
   </a>
 </p>
 
@@ -26,7 +26,7 @@
 
 ### 🚀 **[How to taint eks node group](#-How-to-taint-eks-node-group)**
 - Use `BootstrapArguments` in `Parameters` of cloudformation to input to `kubelet` arguments
-![Alt-Text](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/troubleshoot/img/cfn.png?raw=true)
+![Alt-Text](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/troubleshoot/taint-node/img/cfn.png?raw=true)
 
 ### 🚀 **[Understand kubelet systemd service in the eks node](#-Understand-kubelet-systemd-service-in-the-eks-node)**
 - Enter to the worker and Check kubelet status. We see that kubelet service is started with option `--register-with-taints=dedicated=test:NoSchedule` which is input from `/etc/systemd/system/kubelet.service.d/30-kubelet-extra-args.conf`.
@@ -95,7 +95,7 @@ May 11 07:20:42 ip-17-1-5-1 kubelet: I0511 07:20:42.919112    4139 aws.go:1281] 
 - When apply taint for the eks node I met two issues: typo and missing double `'`
 
 **1. Typo which caused the bash script failed**
-![Alt-Text](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/troubleshoot/img/typo.png?raw=true)
+![Alt-Text](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/troubleshoot/taint-node/img/typo.png?raw=true)
 
 ```
 May 11 04:38:50 ip-172-10-21-203 cloud-init: Cloud-init v. 19.3-3.amzn2 running 'modules:final' at Tue, 11 May 2021 04:38:50 +0000. Up 43.12 seconds.
