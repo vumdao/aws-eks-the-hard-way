@@ -37,6 +37,9 @@
 
 ### 🚀 **[Apply cluster autoscaler deployment in kube-system](#-Apply-cluster-autoscaler-deployment-in-kube-system)**
 - On AWS, Cluster Autoscaler utilizes Amazon EC2 Auto Scaling Groups to manage node groups. Cluster Autoscaler typically runs as a Deployment in your cluster.
+<h1 align="center">
+  <img src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/autoscaling/img/manged_nodegroup.png?raw=true"/>
+</h1>
 
 - Download `cluster-autoscaler-autodiscover.yaml` file to update the command point to your EKS cluster and customize expected parameters such as Optimizing for Cost and Availability, Prevent Scale Down Eviction, 
 ```
