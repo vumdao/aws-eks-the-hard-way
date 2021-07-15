@@ -8,6 +8,11 @@
 </h1>
 
 ### **Taints and Tolerations is used to ensure the node should not accept any pods that do not tolerate the taints. How to add taints to AWS EKS node group? This blog will show you how and the way of trouble shooting**
+<p align="center">
+  <a href="https://dev.to/vumdao">
+    <img alt="Taints and Tolerations" src="https://github.com/vumdao/aws-eks-the-hard-way/blob/master/troubleshoot/img/taint_toleration.png?raw=true" width="700" />
+  </a>
+</p>
 
 ---
 
