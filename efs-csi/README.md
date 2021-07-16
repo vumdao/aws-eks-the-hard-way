@@ -296,16 +296,20 @@ efs-claim   Bound    pvc-2a7e818f-c513-4b79-a47e-5b9c1a7d26a9   1Gi        RWX  
 - Dynamic Access point is created
 ![Dynamic](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/efs-csi/img/dynamic.png?raw=true)
 
-- Check read/write pod
+- Check read/write pod and ensure pods are located to different nodes to demonstrate EFS strongly
 ```
-$ kubectl get pod
-NAME         READY   STATUS    RESTARTS   AGE
-efs-reader   1/1     Running   0          11s
-efs-writer   1/1     Running   0          11s
+$ kubectl get pod -n storage -owide
+NAME         READY   STATUS    RESTARTS   AGE    IP            NODE                                              NOMINATED NODE   READINESS GATES
+efs-reader   1/1     Running   0          14s    10.3.147.2    ip-10-3-141-203.ap-northeast-2.compute.internal   <none>           <none>
+efs-writer   1/1     Running   0          116s   10.3.235.47   ip-10-3-254-49.ap-northeast-2.compute.internal    <none>           <none>
 
-$ kubectl exec efs-reader -- cat /data/out
-Tue Jul 13 05:57:41 UTC 2021
-Tue Jul 13 05:57:46 UTC 2021
+$ kubectl exec efs-reader -n storage -- cat /data/out | head -n 2
+Fri Jul 16 03:54:49 UTC 2021
+Fri Jul 16 03:54:54 UTC 2021
+
+$ kubectl exec efs-writer -n storage -- cat /data/out | head -n 2
+Fri Jul 16 03:54:49 UTC 2021
+Fri Jul 16 03:54:54 UTC 2021
 ```
 
 - Ref: https://github.com/kubernetes-sigs/aws-efs-csi-driver/blob/master/examples/kubernetes/dynamic_provisioning/README.md
