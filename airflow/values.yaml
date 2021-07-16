@@ -1,0 +1,332 @@
+###################################
+# Airflow - Common Configs
+###################################
+airflow:
+  legacyCommands: false
+
+  image:
+    repository: apache/airflow
+    tag: 2.1.2-python3.9
+    pullPolicy: IfNotPresent
+    pullSecret: ""
+    uid: 50000
+    gid: 50000
+
+  executor: CeleryExecutor
+  fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
+  config:
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
+    AIRFLOW__CORE__LOAD_EXAMPLES: "True"
+    GUNICORN_CMD_ARGS: "--log-level WARNING"
+    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "60"
+
+  users:
+    - username: admin
+      password: VincereAirflow2021!
+      role: Admin
+      email: jack.dao@cloudopz.co
+      firstName: admin
+      lastName: admin
+
+  usersTemplates: {}
+  usersUpdate: true
+  connections:
+  connectionsTemplates: {}
+  connectionsUpdate: true
+  variables: []
+  variablesTemplates: {}
+  variablesUpdate: true
+  pools: []
+  poolsUpdate: true
+  extraPipPackages:
+    - "pandahouse==0.2.7"
+    - "clickhouse-driver==0.2.1"
+
+  extraEnv: []
+  extraContainers: []
+
+  extraVolumeMounts: []
+  extraVolumes: []
+
+  kubernetesPodTemplate:
+    securityContext:
+      fsGroup: 65534
+    stringOverride: ""
+    nodeSelector: {}
+    affinity: {}
+    podAnnotations: {}
+    extraPipPackages: []
+    extraVolumeMounts: []
+    extraVolumes: []
+    resources: {}
+
+  sync:
+    resources: {}
+    nodeSelector: {}
+    affinity: {}
+    securityContext:
+      fsGroup: 65534
+    podLabels: {}
+    annotations: {}
+    podAnnotations: {}
+    safeToEvict: true
+
+###################################
+# Airflow - Scheduler Configs
+###################################
+scheduler:
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  securityContext:
+    fsGroup: 65534
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+  safeToEvict: true
+  podDisruptionBudget:
+    enabled: false
+    maxUnavailable: ""
+    minAvailable: ""
+  numRuns: -1
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 5
+  extraPipPackages: []
+  extraVolumeMounts: []
+  extraVolumes: []
+  extraInitContainers: []
+
+###################################
+# Airflow - WebUI Configs
+###################################
+web:
+  ## configs to generate webserver_config.py
+  ##
+  webserverConfig:
+    stringOverride: ""
+    existingSecret: ""
+
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  securityContext:
+    fsGroup: 65534
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+  safeToEvict: true
+  podDisruptionBudget:
+    enabled: false
+    maxUnavailable: ""
+    minAvailable: ""
+  service:
+    annotations: {}
+    sessionAffinity: "None"
+    sessionAffinityConfig: {}
+    type: NodePort
+    externalPort: 8080
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    nodePort:
+      http: ""
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+  extraPipPackages: []
+  extraVolumeMounts: []
+  extraVolumes: []
+
+###################################
+# Airflow - Celery Worker Configs
+###################################
+workers:
+  enabled: true
+  replicas: 2
+  resources:
+    requests:
+      memory: "2Gi"
+
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: "20%"
+
+  autoscaling:
+    enabled: true
+    maxReplicas: 16
+    metrics:
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+  ## configs for the celery worker Pods
+  ##
+  celery:
+    instances: 10
+    gracefullTermination: true
+    gracefullTerminationPeriod: 540
+  terminationPeriod: 60
+  nodeSelector: {}
+  affinity: {}
+  tolerations:
+    - key: 'dedicated'
+      operator: 'Equal'
+      value: 'airflow'
+      effect: 'NoSchedule'
+  securityContext:
+    fsGroup: 65534
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+  safeToEvict: true
+  extraPipPackages: []
+  extraVolumeMounts: []
+  extraVolumes: []
+  secretsDir: /var/airflow/secrets
+  secrets:
+    - clh-password
+    - pg-user
+    - pg-password
+
+
+###################################
+# Airflow - Flower Configs
+###################################
+flower:
+  enabled: true
+  replicas: 1
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  securityContext:
+    fsGroup: 65534
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+  safeToEvict: true
+  podDisruptionBudget:
+    enabled: false
+    maxUnavailable: ""
+    minAvailable: ""
+  oauthDomains: ""
+  basicAuthSecret: ""
+  basicAuthSecretKey: ""
+  service:
+    annotations: {}
+    type: ClusterIP
+    externalPort: 5555
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
+    nodePort:
+      http:
+
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+  extraPipPackages: []
+
+  extraVolumeMounts: []
+  extraVolumes: []
+
+###################################
+# Airflow - Logs Configs
+###################################
+logs:
+  ## the airflow logs folder
+  ##
+  path: /opt/airflow/efs/logs
+  persistence:
+    enabled: true
+    subPath: ""
+    storageClass: "efs-sc"
+    accessMode: ReadWriteMany
+    size: 1Gi
+
+###################################
+# Airflow - DAGs Configs
+###################################
+dags:
+  ## the airflow dags folder
+  ##
+  path: /opt/airflow/efs/dags
+  gitSync:
+    enabled: true
+    repo: "https://gitlab.cloudopz.co/devops/airflow-dags.git"
+    branch: "master"
+    revision: "HEAD"
+    syncWait: 60
+    httpSecret: "airflow-http-git-secret"
+    httpSecretUsernameKey: username
+    httpSecretPasswordKey: password
+    
+###################################
+# Kubernetes - Service Account
+###################################
+serviceAccount:
+  create: true
+  name: "airflow"
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/eks-airflow-sa"
+
+extraManifests: []
+
+###################################
+# Database - PostgreSQL Chart
+# - https://github.com/helm/charts/tree/master/stable/postgresql
+###################################
+postgresql:
+  enabled: true
+  postgresqlDatabase: airflow
+  postgresqlUsername: postgres
+  postgresqlPassword: airflow
+  existingSecretKey: "postgresql-password"
+  extraEnv:
+    - name: BITNAMI_DEBUG
+      value: "true"
+  persistence:
+    enabled: true
+    storageClass: "efs-sc"
+    existingClaim: "data-airflow-postgresql"
+    accessModes:
+      - ReadWriteMany
+    size: 8Gi
+
+  master:
+    podAnnotations:
+      cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+  
+  volumePermissions:
+    enabled: true
