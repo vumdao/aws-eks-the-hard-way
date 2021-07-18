@@ -8,7 +8,7 @@
 </h1>
 
 ## Abstract
-- For multiple pods which need to read/write same data, Amazon Elastic File System (EFS) is the best choice. This post guieds you the new way to create and setup EFS on EKS with IAM role for service account using IaC AWS CDK v2
+- For multiple pods which need to read/write same data, Amazon Elastic File System (EFS) is the best choice. This post guides you the new way to create and setup EFS on EKS with IAM role for service account using IaC AWS CDK v2
 
 ## Table Of Contents
  * [What is Amazon Elastic File System?](#What-is-Amazon-Elastic-File-System?)
