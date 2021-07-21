@@ -83,8 +83,11 @@ aws-node-termination-handler-j8xf6              1/1     Running   0          2m 
 ```
 
 - Slack alarm
+  - Rebalance recommendation
+  ![slack](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/spot-instance/img/slack1.png?raw=true)
 
-![slack](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/spot-instance/img/slack1.png?raw=true)
+  - Spot interruption event
+  ![interrupt](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/spot-instance/img/spot_interrupt.jpg?raw=true)
 
 - Check CPU and mem cost by the pod
 
