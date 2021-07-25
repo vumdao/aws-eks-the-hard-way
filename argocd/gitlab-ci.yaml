@@ -1,0 +1,27 @@
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy app"
+    - branch_name=$(echo $CI_COMMIT_REF_NAME | sed 's/\//-/g')
+    - name_space=$(echo $branch_name | cut -d'-' -f2)
+    - app_version="$branch_name-$CI_PIPELINE_ID"
+    - cdk_image="123456789012.dkr.ecr.ap-northeast-2.amazonaws.com/cdk8s-python:latest"
+    - git clone git@gitlab.cloudopz.co:devops/cdk8s.git
+    - cd cdk8s
+    - docker run -v $(pwd)/deployments:/deployments ${cdk_image}
+    - cp app/main.py app/app.py app/appsch.py deployments
+    - docker run -v $(pwd)/deployments:/deployments -e APP_VERSION=${app_version} -e NAMESPACE=${name_space} ${cdk_image} synth
+    - temp_dir=$(mktemp -d /tmp/k8s-dev-XXXX)
+    - git clone git@gitlab.cloudopz.co:devops/k8s-dev.git ${temp_dir}
+    - cp deployments/dist/app.k8s.yaml ${temp_dir}/${name_space}/app.yaml
+    - cd ${temp_dir}
+    - git add ${name_space}/app.yaml
+    - git commit -m "Deploy app version ${app_version} for ${branch_name}"
+    - result=$(git push origin master || echo "False")
+    - |
+      if [ "$result" == "False" ]; then
+        echo "A gap between two push, let's pull and retry"
+        git pull
+        git push origin master
+      fi
+    - rm -r ${temp_dir}
