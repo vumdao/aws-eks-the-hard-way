@@ -26,11 +26,11 @@ This post provides an overview of Amazon EC2 Spot Instances, as well as best pra
 ![Alt-Test](https://github.com/vumdao/aws-eks-the-hard-way/blob/master/spot-instance/img/spot_intro.png?raw=true)
 
 ## 🚀 **The life cycle of a Spot Instance** <a name="The-life-cycle-of-a-Spot-Instance"></a>
-1. You (or an application running on your behalf) submits a bid to run a desired number of EC2 instances of a particular type. The bid includes the price that you are willing to pay to use the instance for an hour.
+**1. You (or an application running on your behalf) submits a bid to run a desired number of EC2 instances of a particular type. The bid includes the price that you are willing to pay to use the instance for an hour.**
 
-2. When your bid price exceeds the current Spot price (which varies based on supply and demand), your instances are run.
+**2. When your bid price exceeds the current Spot price (which varies based on supply and demand), your instances are run.**
 
-3. Spot instance is interrupted or reclaimed for one of following reasons:
+**3. Spot instance is interrupted or reclaimed for one of following reasons:**
   - Price – The Spot price is greater than your maximum price.
   - Capacity – If there are not enough unused EC2 instances to meet the demand for On-Demand Instances, Amazon EC2 interrupts Spot Instances. The order in which the instances are interrupted is determined by Amazon EC2.
   - Constraints – If your request includes a constraint such as a launch group or an Availability Zone group, these Spot Instances are terminated as a group when the constraint can no longer be met.
