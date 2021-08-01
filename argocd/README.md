@@ -8,7 +8,7 @@
 </h1>
 
 ## Abstract
-[Argo CD] (https://argoproj.github.io/argo-cd/) is a declarative, GitOps continuous delivery tool for Kubernetes. The core component of Argo CD is the Application Controller, which continuously monitors running applications and compares the live application state against the desired target state defined in the Git repository. This post helps you hands-on deploying argo-cd on AWS EKS and suggest a flow of CI/CD on argo-cd
+[Argo CD](https://argoproj.github.io/argo-cd/) is a declarative, GitOps continuous delivery tool for Kubernetes. The core component of Argo CD is the Application Controller, which continuously monitors running applications and compares the live application state against the desired target state defined in the Git repository. This post helps you hands-on deploying argo-cd on AWS EKS and suggest a flow of CI/CD on argo-cd
 
 ## Table Of Contents
  * [Install Argo-CD and set up](#Install-Argo-CD-and-set-up)
