@@ -1,0 +1,21 @@
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    dev: app
+  name: app
+  namespace: dev8
+spec:
+  maxReplicas: 2
+  metrics:
+    - resource:
+        name: cpu
+        target:
+          averageUtilization: 85
+          type: Utilization
+      type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: app
