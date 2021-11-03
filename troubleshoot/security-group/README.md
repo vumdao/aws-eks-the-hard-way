@@ -10,7 +10,7 @@
 ## Abstract
 - When create new Auto scaling group, there were three issues that I faced:
     1. `kubelet` failed to start due to error listing AWS instances from metadata
-    2. IPAM failed to start (no secondary in the ASG nodes)
+    2. IPAM failed to start (no secondary IP addresses in the ASG nodes)
     3. Pods were not able to connect public URL although outbound allows all traffic to 0.0.0.0
     4. Outbound is matter for L-IPAMD (IP Address Manager systemD service)
 
@@ -37,13 +37,6 @@
 <img src="images/sg-default.png" width="1100" />
 
 - By default, when you create a network interface, it's associated with the default security group for the VPC, unless you specify a different security group
-
-- Security group rules:
-    - Source or destination: The source (inbound rules) or destination (outbound rules) for the traffic. Specify one of these options:
-        - Another security group. This allows instances that are associated with the specified security group to access instances associated with this security group. Choosing this option does not add rules from the source security group to this security group. You can specify one of the following security groups:
-            - The current security group
-            - A different security group for the same VPC
-            - A different security group for a peer VPC in a VPC peering connection
 
 - When you specify a security group as the source or destination for a rule, the rule affects all instances that are associated with the security group. Incoming traffic is allowed based on the private IP addresses of the instances that are associated with the source security group (and not the public IP or Elastic IP addresses).
 
